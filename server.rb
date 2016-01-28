@@ -137,7 +137,7 @@ class Server
     hs = @highscores.sort! do |x, y|
       x[1].to_i <=> y[1].to_i
     end.first(20)
-    send_hs(hs, client)
+    send_highscores(hs, client)
   end
 
   def send_online(client)
