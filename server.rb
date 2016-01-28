@@ -2,7 +2,7 @@
 require "socket"
 require "awesome_print"
 
-IP = "localhost"
+IP = ""
 PORT = 3001
 KEY = "snowSweg"
 
