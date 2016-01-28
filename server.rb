@@ -135,7 +135,7 @@ class Server
   def respond_to_highscore_list(pkg, client)
     ap "just got #{pkg} from #{real_client(client).ip}"
     hs = @highscores.sort! do |x, y|
-      x[1].to_i <=> y[1].to_i
+      y[1].to_i <=> x[1].to_i
     end.first(20)
     send_highscores(hs, client)
   end
