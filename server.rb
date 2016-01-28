@@ -87,6 +87,8 @@ class Server
       respond_to_chat(pkg, client)
     when "score"
       respond_to_highscore(pkg, client)
+    when "hs_request"
+      respond_to_highscore_list(pkg, client)
     end
   end
 
@@ -130,8 +132,21 @@ class Server
     end
   end
 
+  def respond_to_highscore_list(pkg, client)
+    ap "just got #{pkg} from #{real_client(client).ip}"
+    hs = @highscores.sort! do |x, y|
+      x[1].to_i <=> y[1].to_i
+    end.first(20)
+    send_hs(hs, client)
+  end
+
   def send_online(client)
     msg = ["0", "online", "#{@online}"].join("||")
+    send_to(msg, client)
+  end
+
+  def send_highscores(hs, client)
+    msg = ["0", "highscores", *hs].join("||")
     send_to(msg, client)
   end
 
