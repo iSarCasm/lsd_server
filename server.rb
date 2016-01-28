@@ -30,6 +30,7 @@ class Server
     @clients = Array.new
     @connections[:server] = @server
     @connections[:clients] = @clients
+    @online = 0
     run
   end
 
@@ -45,14 +46,11 @@ class Server
 
   def on_connection(client)
     new_client = Client.new(client)
-    ap 1
     if new_client? (new_client)
-      ap 2
+      @online += 1
       @connections[:clients] << new_client
     else
-      ap real_client(client).sock == client
       real_client(client).sock = client
-      ap real_client(client).sock == client
     end
     ap "online: #{@clients.length}"
     ap @connections[:clients]
@@ -60,11 +58,12 @@ class Server
 
   def listen_user_messages(client)
     loop {
+      sleep 0.1
       begin
         msg = client.recv(100)
       rescue Exception => e
-        ap "#{real_client(client).ip} disconnected."
-        @connections[:clients].delete(real_client(client))
+        ap "#{client} disconnected."
+        @online -= 1
       end
       got_message(msg, client)
     }
@@ -112,7 +111,7 @@ class Server
   end
 
   def send_online(client)
-    msg = ["0", "online", "#{@clients.length}"].join("||")
+    msg = ["0", "online", "#{@online}"].join("||")
     send_to(msg, client)
   end
 
