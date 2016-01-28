@@ -60,7 +60,12 @@ class Server
 
   def listen_user_messages(client)
     loop {
-      msg = client.recv(100)
+      begin
+        msg = client.recv(100)
+      rescue Exception => e
+        ap "#{real_client(client).ip} disconnected."
+        @connections[:clients].delete(real_client(client))
+      end
       got_message(msg, client)
     }
   end
@@ -82,10 +87,10 @@ class Server
     ap "sent #{msg} to #{real_client(client).ip}"
   end
 
-  def send_to_all(msg)
+  def send_to_all(msg, client)
     ap @connections[:clients]
-    @connections[:clients].each do |client|
-      send_to(msg, client.sock)
+    @connections[:clients].each do |_client|
+      send_to(msg, _client.sock) if client != _client
     end
   end
 
@@ -113,12 +118,12 @@ class Server
 
   def respond_to_chat(pkg, client)
     ap "just got #{pkg} form #{real_client(client).ip}"
-    send_chat(pkg[1], pkg[2]);
+    send_chat(pkg[1], pkg[2], client);
   end
 
-  def send_chat(name, text)
+  def send_chat(name, text, client)
     msg = ["0", "chat", name, text].join("||")
-    send_to_all(msg)
+    send_to_all(msg, client)
   end
 
 
