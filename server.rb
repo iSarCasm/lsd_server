@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby -w
 require "socket"
+require 'json'
 require "awesome_print"
 
 IP = ""
@@ -24,6 +25,8 @@ end
 
 class Server
   def initialize( port, ip )
+    @mutexHS = Mutex.new
+    @highscores = JSON.parse(File.read(File.expand_path('../../db/score.json', __FILE__)))
     @server = TCPServer.open( ip, port )
     @connections = Hash.new
     @rooms = Hash.new
@@ -82,6 +85,8 @@ class Server
       respond_to_online(pkg, client)
     when "chat"
       respond_to_chat(pkg, client)
+    when "score"
+      respond_to_highscore(pkg, client)
     end
   end
 
@@ -99,7 +104,7 @@ class Server
 
 
   def respond_to_login(pkg, client)
-    ap "just got #{pkg} form #{real_client(client).ip}"
+    ap "just got #{pkg} from #{real_client(client).ip}"
     send_system("Successfully connected to server", client)
   end
 
@@ -109,8 +114,20 @@ class Server
   end
 
   def respond_to_online(pkg, client)
-    ap "just got #{pkg} form #{real_client(client).ip}"
+    ap "just got #{pkg} from #{real_client(client).ip}"
     send_online(client)
+  end
+
+  def respond_to_highscore(pkg, client)
+    ap "just got #{pkg} from #{real_client(client).ip}"
+    name = pkg[1]
+    score = pkg[2].to_i
+    @mutexHS.synchronize do
+      @highscores << [name, score]
+      File.open(File.expand_path('../../db/score.json', __FILE__), 'w') do |f|
+        f.write(@highscores.to_json)
+      end
+    end
   end
 
   def send_online(client)
@@ -119,7 +136,7 @@ class Server
   end
 
   def respond_to_chat(pkg, client)
-    ap "just got #{pkg} form #{real_client(client).ip}"
+    ap "just got #{pkg} from #{real_client(client).ip}"
     send_chat(pkg[1], pkg[2], client);
   end
 
