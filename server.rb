@@ -52,6 +52,8 @@ class Server
     else
       real_client(client).sock = client
     end
+    Thread.current[:client] = real_client(client)
+
     ap "online: #{@clients.length}"
     ap @connections[:clients]
   end
@@ -62,7 +64,8 @@ class Server
       begin
         msg = client.recv(100)
       rescue Exception => e
-        ap "#{client} disconnected."
+        ap "#{Thread.current[:client].ip} disconnected."
+        @connections[:clients].delete(Thread.current[:client])
         @online -= 1
       end
       got_message(msg, client)
@@ -89,7 +92,7 @@ class Server
   def send_to_all(msg, client)
     ap @connections[:clients]
     @connections[:clients].each do |_client|
-      send_to(msg, _client.sock) if client != _client
+      send_to(msg, _client.sock) if real_client(client) != _client
     end
   end
 
