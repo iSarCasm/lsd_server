@@ -26,7 +26,7 @@ end
 class Server
   def initialize( port, ip )
     @mutexHS = Mutex.new
-    @highscores = JSON.parse(File.read(File.expand_path('../../db/score.json', __FILE__)))
+    @highscores = JSON.parse(File.read(File.expand_path('../db/score.json', __FILE__)))
     @server = TCPServer.open( ip, port )
     @connections = Hash.new
     @rooms = Hash.new
@@ -124,7 +124,7 @@ class Server
     score = pkg[2].to_i
     @mutexHS.synchronize do
       @highscores << [name, score]
-      File.open(File.expand_path('../../db/score.json', __FILE__), 'w') do |f|
+      File.open(File.expand_path('../db/score.json', __FILE__), 'w') do |f|
         f.write(@highscores.to_json)
       end
     end
