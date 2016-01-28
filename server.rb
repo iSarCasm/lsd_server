@@ -73,7 +73,8 @@ class Server
   end
 
   def got_message(msg, client)
-    pkg = msg.split("||") if (msg != nil)
+    return  if (msg == nil)
+    pkg = msg.split("||")
     case(pkg[0])
     when "login"
       respond_to_login(pkg, client)
@@ -100,7 +101,6 @@ class Server
   def respond_to_login(pkg, client)
     ap "just got #{pkg} form #{real_client(client).ip}"
     send_system("Successfully connected to server", client)
-    # 3.times { send_online(client); }
   end
 
   def send_system(text, client)
