@@ -73,8 +73,7 @@ class Server
   end
 
   def got_message(msg, client)
-    if (msg != nil)
-      pkg = msg.split("||")
+    pkg = msg.split("||") if (msg != nil)
     case(pkg[0])
     when "login"
       respond_to_login(pkg, client)
