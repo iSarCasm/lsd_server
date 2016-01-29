@@ -71,7 +71,7 @@ class Server
         @connections[:clients].delete(Thread.current[:client])
         @online -= 1
       end
-      got_message(msg, client)
+      got_message(msg.force_encoding('UTF-8'), client)
     }
   end
 
@@ -126,7 +126,9 @@ class Server
     score = pkg[2].to_i
     @mutexHS.synchronize do
       if @highscores.find { |record| record[0] == name }
-        @highscores.find { |record| record[0] == name }[1] = score # Update score, not add
+        if score > @highscores.find { |record| record[0] == name }[1]
+          @highscores.find { |record| record[0] == name }[1] = score # Update score, not add
+        end
       else
         @highscores << [name, score]
       end
