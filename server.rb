@@ -125,7 +125,11 @@ class Server
     name = pkg[1]
     score = pkg[2].to_i
     @mutexHS.synchronize do
-      @highscores << [name, score]
+      if @highscores.find { |record| record[0] == name }
+        highscores.find { |record| record[0] == name }[1] = score # Update score, not add
+      else
+        @highscores << [name, score]
+      end
       File.open(File.expand_path('../db/score.json', __FILE__), 'w') do |f|
         f.write(@highscores.to_json)
       end
