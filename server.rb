@@ -125,6 +125,10 @@ class Server
     ap "just got #{pkg} from #{real_client(client).ip}"
     name = pkg[1].force_encoding('UTF-8')
     score = pkg[2].to_i
+    if (pkg[2] != pkg[3].reverse)
+      ap "Artmoney boy"
+      return
+    end
     @mutexHS.synchronize do
       if @highscores.find { |record| record[0] == name }
         if score > @highscores.find { |record| record[0] == name }[1]
