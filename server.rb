@@ -93,7 +93,7 @@ class Server
   end
 
   def send_to(msg, client)
-    client.puts "#{msg}"
+    client.puts "#{msg.force_encoding('UTF-8')}"
     ap "sent #{msg} to #{real_client(client).ip}"
   end
 
