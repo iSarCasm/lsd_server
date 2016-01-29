@@ -26,7 +26,7 @@ end
 class Server
   def initialize( port, ip )
     @mutexHS = Mutex.new
-    @highscores = JSON.parse(File.read(File.expand_path('../db/score.json', __FILE__)))
+    @highscores = JSON.parse(File.read(File.expand_path('../db/score.json', __FILE__))).force_encoding('UTF-8')
     @server = TCPServer.open( ip, port )
     @connections = Hash.new
     @rooms = Hash.new
@@ -122,7 +122,7 @@ class Server
 
   def respond_to_highscore(pkg, client)
     ap "just got #{pkg} from #{real_client(client).ip}"
-    name = pkg[1]
+    name = pkg[1].force_encoding('UTF-8')
     score = pkg[2].to_i
     @mutexHS.synchronize do
       if @highscores.find { |record| record[0] == name }
