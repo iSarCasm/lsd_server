@@ -26,7 +26,7 @@ end
 class Server
   def initialize( port, ip )
     @mutexHS = Mutex.new
-    @highscores = JSON.parse(File.read(File.expand_path('../db/score.json', __FILE__))).force_encoding('UTF-8')
+    @highscores = JSON.parse(File.read(File.expand_path('../db/score.json', __FILE__)).force_encoding('UTF-8'))
     @server = TCPServer.open( ip, port )
     @connections = Hash.new
     @rooms = Hash.new
