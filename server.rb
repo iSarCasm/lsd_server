@@ -126,7 +126,7 @@ class Server
     score = pkg[2].to_i
     @mutexHS.synchronize do
       if @highscores.find { |record| record[0] == name }
-        highscores.find { |record| record[0] == name }[1] = score # Update score, not add
+        @highscores.find { |record| record[0] == name }[1] = score # Update score, not add
       else
         @highscores << [name, score]
       end
