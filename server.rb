@@ -73,11 +73,10 @@ class Server
         msg = client.recv(100)
         got_message(msg.force_encoding('UTF-8'), client) if (msg != nil)
       rescue Exception => e
-        ap "#{Thread.current[:client].ip} disconnected."
+        ap "#{Thread.current[:client].ip} disconnected. (#{e.to_s})"
         @connections[:clients].delete(Thread.current[:client])
         @online -= 1
       end
-
     }
   end
 
