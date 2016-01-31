@@ -116,7 +116,7 @@ class Server
     send_system("Successfully connected to server", client)
     @gameLaucnhed += 1
     @uniquePlayers << real_client(client).ip
-    @uniquePlayers.unique!
+    @uniquePlayers.uniq!
   end
 
   def send_system(text, client)
