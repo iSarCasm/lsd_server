@@ -72,7 +72,7 @@ class Server
       begin
         msg = client.recv(100)
         got_message(msg.force_encoding('UTF-8'), client) if (msg != nil)
-      rescue Exception => e
+      # rescue Exception => e
         ap "#{Thread.current[:client].ip} disconnected."
         @connections[:clients].delete(Thread.current[:client])
         @online -= 1
@@ -138,7 +138,7 @@ class Server
       return
     end
     @gamesPlayed += 1
-    @waveInfo[pkg[4].to_s] += 1
+    @waveInfo[pkg[4].to_s] += 1 rescue nil
     @mutexHS.synchronize do
       if @highscores.find { |record| record[0] == name }
         if score > @highscores.find { |record| record[0] == name }[1]
