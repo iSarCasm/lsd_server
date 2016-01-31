@@ -34,6 +34,11 @@ class Server
     @connections[:server] = @server
     @connections[:clients] = @clients
     @online = 0
+    @metrics = JSON.parse(File.read(File.expand_path('../db/metrics.json', __FILE__)).force_encoding('UTF-8'))
+    @gamesPlayed = @metrics[0]
+    @gameLaucnhed = @metrics[1]
+    @uniquePlayers = @metrics[2]
+    @waveInfo = @metrics[3]
     run
   end
 
@@ -109,6 +114,9 @@ class Server
   def respond_to_login(pkg, client)
     ap "just got #{pkg} from #{real_client(client).ip}"
     send_system("Successfully connected to server", client)
+    @gameLaucnhed += 1
+    @uniquePlayers << real_client(client).ip
+    @uniquePlayers.unique!
   end
 
   def send_system(text, client)
@@ -129,6 +137,8 @@ class Server
       ap "Artmoney boy"
       return
     end
+    @gamesPlayed += 1
+    @waveInfo[pkg[4].to_s] += 1
     @mutexHS.synchronize do
       if @highscores.find { |record| record[0] == name }
         if score > @highscores.find { |record| record[0] == name }[1]
@@ -139,6 +149,10 @@ class Server
       end
       File.open(File.expand_path('../db/score.json', __FILE__), 'w') do |f|
         f.write(@highscores.to_json)
+      end
+      @metrics = [@gamesPlayed, @gameLaucnhed, @uniquePlayers, @waveInfo]
+      File.open(File.expand_path('../db/metrics.json', __FILE__), 'w') do |f|
+        f.write(@metrics.to_json)
       end
     end
   end
