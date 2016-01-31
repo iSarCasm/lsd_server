@@ -2,6 +2,7 @@
 require "socket"
 require 'json'
 require "awesome_print"
+require 'logger'
 
 IP = ""
 PORT = 3001
@@ -39,12 +40,13 @@ class Server
     @gameLaucnhed = @metrics[1]
     @uniquePlayers = @metrics[2]
     @waveInfo = @metrics[3]
+    @log = Logger.new('logfile.log', 'daily')
     run
   end
 
   def run
     loop {
-      ap "Server start."
+      @log.info "Server start."
       Thread.start(@server.accept) do |client|
         on_connection(client)
         listen_user_messages(client)
@@ -62,8 +64,8 @@ class Server
     end
     Thread.current[:client] = real_client(client)
 
-    ap "online: #{@clients.length}"
-    ap @connections[:clients]
+    @log.info "online: #{@clients.length}"
+    @log.info @connections[:clients]
   end
 
   def listen_user_messages(client)
@@ -73,7 +75,7 @@ class Server
         msg = client.recv(100)
         got_message(msg.force_encoding('UTF-8'), client) if (msg != nil)
       rescue Exception => e
-        ap "#{Thread.current[:client].ip} disconnected. (#{e.to_s})"
+        @log.warn "#{Thread.current[:client].ip} disconnected. (#{e.to_s})"
         @connections[:clients].delete(Thread.current[:client])
         @online -= 1
       end
@@ -99,11 +101,11 @@ class Server
 
   def send_to(msg, client)
     client.puts "#{msg.force_encoding('UTF-8')}"
-    ap "sent #{msg} to #{real_client(client).ip}"
+    @log.info "sent #{msg} to #{real_client(client).ip}"
   end
 
   def send_to_all(msg, client)
-    ap @connections[:clients]
+    @log.info @connections[:clients]
     @connections[:clients].each do |_client|
       send_to(msg, _client.sock) if real_client(client) != _client
     end
@@ -111,7 +113,7 @@ class Server
 
 
   def respond_to_login(pkg, client)
-    ap "just got #{pkg} from #{real_client(client).ip}"
+    @log.info "just got #{pkg} from #{real_client(client).ip}"
     send_system("Successfully connected to server", client)
     @gameLaucnhed += 1
     @uniquePlayers << real_client(client).ip
@@ -124,16 +126,16 @@ class Server
   end
 
   def respond_to_online(pkg, client)
-    ap "just got #{pkg} from #{real_client(client).ip}"
+    @log.info "just got #{pkg} from #{real_client(client).ip}"
     send_online(client)
   end
 
   def respond_to_highscore(pkg, client)
-    ap "just got #{pkg} from #{real_client(client).ip}"
+    @log.info "just got #{pkg} from #{real_client(client).ip}"
     name = pkg[1].force_encoding('UTF-8')
     score = pkg[2].to_i
     if (pkg[2] != pkg[3].reverse)
-      ap "Artmoney boy"
+      @log.fatal "Artmoney boy"
       return
     end
     @gamesPlayed += 1
@@ -157,7 +159,7 @@ class Server
   end
 
   def respond_to_highscore_list(pkg, client)
-    ap "just got #{pkg} from #{real_client(client).ip}"
+    @log.info "just got #{pkg} from #{real_client(client).ip}"
     hs = @highscores.sort! do |x, y|
       y[1].to_i <=> x[1].to_i
     end.first(20)
@@ -175,7 +177,7 @@ class Server
   end
 
   def respond_to_chat(pkg, client)
-    ap "just got #{pkg} from #{real_client(client).ip}"
+    @log.info "just got #{pkg} from #{real_client(client).ip}"
     send_chat(pkg[1], pkg[2], client);
   end
 
