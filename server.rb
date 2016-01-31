@@ -65,7 +65,6 @@ class Server
     Thread.current[:client] = real_client(client)
 
     @log.info "online: #{@clients.length}"
-    @log.info @connections[:clients]
   end
 
   def listen_user_messages(client)
